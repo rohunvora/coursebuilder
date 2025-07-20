@@ -18,13 +18,9 @@ if [ -z "$DATABASE_URL" ]; then
   exit 1
 fi
 
-# 3. Push database schema
-echo "📋 Pushing database schema to Supabase..."
-npx prisma db push --skip-generate || {
-  echo "❌ Database schema push failed!"
-  echo "Please check your DATABASE_URL and Supabase connection"
-  exit 1
-}
+# 3. Skip database schema push in production (already configured)
+echo "✅ Skipping database schema push (database already configured)"
+# To manually push schema: npx prisma db push
 
 # 4. Build Next.js
 echo "🏗️ Building Next.js application..."
