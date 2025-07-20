@@ -30,8 +30,10 @@ Return JSON only:
 
 export async function parseGoal(userInput: string): Promise<ParsedGoal> {
   try {
+    console.log('[Goal Parser] Parsing:', userInput)
+    
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-3.5-turbo', // Use stable model instead of gpt-4o
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Parse this learning goal: ${userInput}` }
@@ -47,10 +49,16 @@ export async function parseGoal(userInput: string): Promise<ParsedGoal> {
     const parsed = JSON.parse(content)
     
     // Ensure we have exactly 7 skills
+    if (!parsed.microSkills || parsed.microSkills.length === 0) {
+      throw new Error('No micro skills generated')
+    }
+    
     if (parsed.microSkills.length !== 7) {
       parsed.microSkills = parsed.microSkills.slice(0, 7)
       parsed.learningObjectives = parsed.learningObjectives.slice(0, 7)
     }
+
+    console.log('[Goal Parser] Success:', parsed.topic, `(${parsed.microSkills.length} skills)`)
 
     return {
       topic: parsed.topic,
@@ -59,7 +67,18 @@ export async function parseGoal(userInput: string): Promise<ParsedGoal> {
       estimatedDuration: parsed.estimatedDuration || 30,
     }
   } catch (error) {
-    console.error('Error parsing goal:', error)
-    throw new Error('Failed to parse learning goal')
+    console.error('[Goal Parser] Error:', error)
+    if (error instanceof Error) {
+      if (error.message.includes('model')) {
+        throw new Error('AI model not available. Please try again.')
+      }
+      if (error.message.includes('rate')) {
+        throw new Error('Too many requests. Please wait a moment.')
+      }
+      if (error.message.includes('API')) {
+        throw new Error('AI service temporarily unavailable.')
+      }
+    }
+    throw new Error('Failed to parse learning goal. Please try again.')
   }
 }

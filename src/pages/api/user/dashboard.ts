@@ -8,12 +8,21 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  console.log('[Dashboard API] Request:', {
+    method: req.method,
+    headers: {
+      'x-user-id': req.headers['x-user-id'],
+      'user-agent': req.headers['user-agent']
+    }
+  })
+  
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
   // For demo, use a default user ID
   const userId = req.headers['x-user-id'] as string || 'demo-user'
+  console.log('[Dashboard API] Using userId:', userId)
 
   try {
     // Get or create user

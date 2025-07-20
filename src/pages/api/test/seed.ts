@@ -48,13 +48,18 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Only allow in development or with secret key
-  if (process.env.NODE_ENV === 'production' && req.headers['x-seed-secret'] !== process.env.SEED_SECRET) {
-    return res.status(403).json({ error: 'Unauthorized' })
+  // Allow GET in test mode for easy browser testing
+  const allowedMethods = process.env.NEXT_PUBLIC_TEST_MODE === 'true' ? ['GET', 'POST'] : ['POST']
+  
+  if (!allowedMethods.includes(req.method!)) {
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+  // In production, require either test mode or secret key
+  if (process.env.NODE_ENV === 'production' && 
+      process.env.NEXT_PUBLIC_TEST_MODE !== 'true' && 
+      req.headers['x-seed-secret'] !== process.env.SEED_SECRET) {
+    return res.status(403).json({ error: 'Test mode not enabled' })
   }
 
   try {

@@ -53,7 +53,7 @@ Return JSON in this exact format:
 export async function generateCourse(topic: string): Promise<Course> {
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-3.5-turbo',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Create a course on: ${topic}` }
