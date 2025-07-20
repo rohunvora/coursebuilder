@@ -1,0 +1,119 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  lastActive  DateTime @default(now())
+  
+  courses     UserCourse[]
+  skills      UserSkill[]
+  achievements UserAchievement[]
+  dailyStreaks DailyStreak[]
+}
+
+model Course {
+  id          String   @id
+  title       String
+  topic       String
+  createdAt   DateTime @default(now())
+  
+  microSkills MicroSkill[]
+  users       UserCourse[]
+}
+
+model MicroSkill {
+  id          String   @id
+  courseId    String
+  name        String
+  explanation String
+  orderIndex  Int
+  bloomLevel  String
+  
+  question      String
+  choices       String // JSON array
+  correctIndex  Int
+  questionExplanation String
+  
+  course      Course     @relation(fields: [courseId], references: [id])
+  userSkills  UserSkill[]
+}
+
+model UserCourse {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  currentXP   Int      @default(0)
+  
+  user        User     @relation(fields: [userId], references: [id])
+  course      Course   @relation(fields: [courseId], references: [id])
+  
+  @@unique([userId, courseId])
+}
+
+model UserSkill {
+  id              String   @id @default(cuid())
+  userId          String
+  skillId         String
+  
+  // Bayesian knowledge tracking
+  knowledgeProb   Float    @default(0.3) // Prior probability
+  correctAttempts Int      @default(0)
+  totalAttempts   Int      @default(0)
+  
+  // Spaced repetition
+  lastReviewedAt  DateTime @default(now())
+  nextReviewAt    DateTime @default(now())
+  intervalDays    Float    @default(1)
+  easeFactor      Float    @default(2.5)
+  
+  // Analytics
+  avgResponseTime Int      @default(0) // milliseconds
+  confidence      Float    @default(0.5) // 0-1
+  
+  user            User     @relation(fields: [userId], references: [id])
+  skill           MicroSkill @relation(fields: [skillId], references: [id])
+  
+  @@unique([userId, skillId])
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  icon        String
+  xpReward    Int
+  
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id          String   @id @default(cuid())
+  userId      String
+  achievementId String
+  unlockedAt  DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id])
+  achievement Achievement @relation(fields: [achievementId], references: [id])
+  
+  @@unique([userId, achievementId])
+}
+
+model DailyStreak {
+  id          String   @id @default(cuid())
+  userId      String
+  date        DateTime @default(now())
+  completed   Boolean  @default(false)
+  
+  user        User     @relation(fields: [userId], references: [id])
+  
+  @@unique([userId, date])
+}
