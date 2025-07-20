@@ -16,7 +16,13 @@ export default async function handler(
 
   console.log('[Debug Generate] Starting with:', { topic, userId })
 
-  const debugInfo = {
+  const debugInfo: {
+    request: any
+    environment: any
+    steps: any[]
+    error: any
+    result: any
+  } = {
     request: {
       method: req.method,
       query: req.query,

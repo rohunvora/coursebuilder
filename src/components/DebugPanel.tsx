@@ -56,7 +56,7 @@ export default function DebugPanel() {
     loadDebugData();
     const interval = setInterval(loadDebugData, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [shouldShow]);
 
   if (!shouldShow) return null;
 
