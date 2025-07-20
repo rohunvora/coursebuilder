@@ -4,22 +4,6 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "env": {
-    "NEXT_PUBLIC_DEBUG_MODE": "@next_public_debug_mode",
-    "NEXT_PUBLIC_TEST_MODE": "@next_public_test_mode",
-    "NEXT_PUBLIC_ENABLE_ACHIEVEMENTS": "@next_public_enable_achievements",
-    "NEXT_PUBLIC_ENABLE_SPACED_REPETITION": "@next_public_enable_spaced_repetition",
-    "NEXT_PUBLIC_ENABLE_CONFIDENCE_TRACKING": "@next_public_enable_confidence_tracking",
-    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key"
-  },
-  "build": {
-    "env": {
-      "DATABASE_URL": "@database_url",
-      "OPENAI_API_KEY": "@openai_api_key",
-      "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key"
-    }
-  },
   "functions": {
     "src/pages/api/generate.ts": {
       "maxDuration": 30
