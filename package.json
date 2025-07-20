@@ -13,6 +13,7 @@
     "vercel-build": "./scripts/vercel-build.sh",
     "seed-achievements": "node scripts/seed-achievements.js",
     "seed-achievements:db": "node scripts/seed-achievements-db.js",
+    "seed-test-data": "node scripts/seed-test-data.js",
     "setup-db": "node scripts/setup-database.js",
     "setup-db:seed": "node scripts/setup-database.js --seed",
     "test:unit": "jest --config config/jest.config.js tests/unit",

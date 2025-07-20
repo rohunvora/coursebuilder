@@ -51,14 +51,38 @@ export default function Home() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || 'Failed to generate course')
+        let errorMessage = 'Unable to create your course right now. Please try again.'
+        
+        try {
+          const error = await response.json()
+          // Use the server's error message if it's user-friendly
+          if (error.message && !error.message.includes('JSON') && !error.message.includes('undefined')) {
+            errorMessage = error.message
+          }
+        } catch {
+          // If we can't parse the error response, use the default message
+        }
+        
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
       router.push(`/course/${data.courseId}?generating=true`)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Something went wrong')
+      // Provide user-friendly error messages
+      let message = 'Something went wrong. Please try again.'
+      
+      if (error instanceof Error) {
+        if (error.message.includes('fetch')) {
+          message = 'Unable to connect to the server. Please check your internet connection.'
+        } else if (error.message.includes('JSON')) {
+          message = 'The server returned an invalid response. Please try again.'
+        } else {
+          message = error.message
+        }
+      }
+      
+      toast.error(message)
       setLoading(false)
     }
   }

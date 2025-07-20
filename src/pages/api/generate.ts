@@ -10,6 +10,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  console.log('[Generate API] Request received:', { method: req.method, body: req.body })
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
@@ -18,6 +20,12 @@ export default async function handler(
 
   if (!topic || typeof topic !== 'string') {
     return res.status(400).json({ message: 'Topic is required' })
+  }
+  
+  // Validate OpenAI API key
+  if (!process.env.OPENAI_API_KEY) {
+    console.error('[Generate API] OpenAI API key not configured')
+    return res.status(500).json({ message: 'Course generation service not configured. Please check server settings.' })
   }
 
   const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'anonymous'
@@ -112,7 +120,26 @@ export default async function handler(
     
     return res.status(200).json({ courseId: course.id })
   } catch (error) {
-    console.error('Error generating course:', error)
+    console.error('[Generate API] Error generating course:', error)
+    console.error('[Generate API] Error details:', {
+      name: error instanceof Error ? error.name : 'Unknown',
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined
+    })
+    
+    // More specific error messages based on error type
+    if (error instanceof Error) {
+      if (error.message.includes('OPENAI_API_KEY')) {
+        return res.status(500).json({ message: 'Course generation service not configured properly.' })
+      }
+      if (error.message.includes('rate limit')) {
+        return res.status(429).json({ message: 'Too many requests. Please try again in a moment.' })
+      }
+      if (error.message.includes('timeout')) {
+        return res.status(504).json({ message: 'Course generation took too long. Please try again.' })
+      }
+    }
+    
     return res.status(500).json({ message: 'Failed to generate course. Please try again.' })
   }
 }

@@ -28,9 +28,12 @@ export default function DebugPanel() {
     },
     errors: [],
   });
+  
+  // Hide in production unless explicitly enabled
+  const shouldShow = config.debugMode && (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DEBUG_MODE === 'true');
 
   useEffect(() => {
-    if (!config.debugMode) return;
+    if (!shouldShow) return;
 
     // Load debug data from localStorage
     const loadDebugData = () => {
@@ -55,7 +58,7 @@ export default function DebugPanel() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!config.debugMode) return null;
+  if (!shouldShow) return null;
 
   return (
     <>
@@ -148,16 +151,13 @@ export default function DebugPanel() {
                 </button>
                 <button
                   onClick={() => {
-                    const testUser = {
-                      id: config.testUsers.intermediate,
-                      level: 5,
-                      xp: 42,
-                      streak: 7,
-                      achievements: ['first-answer', 'streak-3', 'streak-7'],
-                      created: new Date().toISOString(),
-                    };
-                    localStorage.setItem('user', JSON.stringify(testUser));
-                    window.location.reload();
+                    // Set the test user ID
+                    localStorage.setItem('userId', 'test-user-intermediate');
+                    // Clear any cached data
+                    localStorage.removeItem('currentCourse');
+                    localStorage.removeItem('user');
+                    // Reload to fetch test user data from database
+                    window.location.href = '/dashboard';
                   }}
                   className="text-xs bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 transition-colors ml-2"
                 >

@@ -16,10 +16,16 @@ function validateEnv(): Record<RequiredEnvVars, string> {
   }
 
   if (missingVars.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missingVars.join(', ')}\n` +
-      `Please copy .env.example to .env and fill in the values.`
-    )
+    // In production, log the error but don't throw to prevent app crash
+    const errorMessage = `Missing required environment variables: ${missingVars.join(', ')}`
+    console.error(errorMessage)
+    
+    // Return empty values to allow the app to run (with degraded functionality)
+    const fallbackEnv: Record<RequiredEnvVars, string> = {} as any
+    for (const varName of requiredEnvVars) {
+      fallbackEnv[varName] = env[varName] || ''
+    }
+    return fallbackEnv
   }
 
   return env as Record<RequiredEnvVars, string>
