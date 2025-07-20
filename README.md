@@ -220,3 +220,16 @@ npm run dev
 ## License
 
 MIT
+## Directory Structure
+
+```
+coursebuilder/
+├── src/          # Source code
+├── docs/         # Documentation
+├── tests/        # Test files
+├── demos/        # Standalone demos
+├── dist/         # Distribution packages
+├── scripts/      # Build and utility scripts
+├── config/       # Configuration files
+└── prisma/       # Database schema
+```

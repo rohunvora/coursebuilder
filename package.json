@@ -8,10 +8,14 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "test": "jest",
+    "test": "jest --config config/jest.config.js",
     "postinstall": "prisma generate",
     "vercel-build": "prisma generate && prisma db push && next build && npm run seed-achievements",
-    "seed-achievements": "node scripts/seed-achievements.js"
+    "seed-achievements": "node scripts/seed-achievements.js",
+    "test:unit": "jest --config config/jest.config.js tests/unit",
+    "test:integration": "jest --config config/jest.config.js tests/integration",
+    "clean": "rm -rf .next .cache .tmp dist/*.zip",
+    "package": "./scripts/package.sh"
   },
   "dependencies": {
     "next": "14.0.4",

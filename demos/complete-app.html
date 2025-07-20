@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Builder v1.2 - Complete Edition</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.17.9/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/recharts@2.5.0/umd/Recharts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+        const { motion } = window.Motion;
+        const { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
+
+        // Mock OpenAI API
+        class MockOpenAI {
+            constructor(apiKey) {
+                this.apiKey = apiKey;
+                this.courses = {
+                    'stoic-philosophy': {
+                        title: 'Stoic Philosophy: From Basics to Mastery',
+                        microSkills: [
+                            {
+                                id: 'skill-1',
+                                name: 'Core Stoic Principles',
+                                explanation: 'Understanding the fundamental tenets of Stoicism including wisdom, justice, courage, and temperance.',
+                                bloomLevel: 'Remember',
+                                quiz: {
+                                    question: 'Which of these is NOT one of the four cardinal virtues in Stoicism?',
+                                    choices: ['Wisdom', 'Wealth', 'Justice', 'Courage'],
+                                    correctIndex: 1,
+                                    explanation: 'The four cardinal virtues are Wisdom, Justice, Courage, and Temperance. Wealth is not a virtue in Stoicism.',
+                                    criticScore: 9
+                                }
+                            },
+                            {
+                                id: 'skill-2',
+                                name: 'The Dichotomy of Control',
+                                explanation: 'Learning to distinguish between what is within our control and what is not.',
+                                bloomLevel: 'Understand',
+                                quiz: {
+                                    question: 'According to Epictetus, what should we focus our energy on?',
+                                    choices: ['Changing others\' opinions', 'Controlling external events', 'Our own thoughts and actions', 'Achieving perfect outcomes'],
+                                    correctIndex: 2,
+                                    explanation: 'Epictetus taught that we should focus only on what is within our control: our own thoughts, judgments, and actions.',
+                                    criticScore: 9
+                                }
+                            },
+                            {
+                                id: 'skill-3',
+                                name: 'Applying Stoic Practices',
+                                explanation: 'Implementing daily Stoic exercises like negative visualization and morning reflection.',
+                                bloomLevel: 'Apply',
+                                quiz: {
+                                    question: 'How would a Stoic respond to being stuck in traffic?',
+                                    choices: ['Honk angrily at other drivers', 'Accept it as outside their control', 'Give up and go home', 'Blame the city planning'],
+                                    correctIndex: 1,
+                                    explanation: 'A Stoic would recognize traffic as an external event outside their control and focus on their response to it.',
+                                    criticScore: 8
+                                }
+                            },
+                            {
+                                id: 'skill-4',
+                                name: 'Analyzing Stoic Texts',
+                                explanation: 'Breaking down passages from Marcus Aurelius, Seneca, and Epictetus.',
+                                bloomLevel: 'Analyze',
+                                quiz: {
+                                    question: 'What is the main theme of Marcus Aurelius\' Meditations?',
+                                    choices: ['Military strategy', 'Personal philosophical reflections', 'Roman history', 'Economic theory'],
+                                    correctIndex: 1,
+                                    explanation: 'Meditations is a series of personal philosophical reflections by Marcus Aurelius on Stoic philosophy.',
+                                    criticScore: 9
+                                }
+                            },
+                            {
+                                id: 'skill-5',
+                                name: 'Evaluating Life Decisions',
+                                explanation: 'Using Stoic principles to evaluate and make important life decisions.',
+                                bloomLevel: 'Evaluate',
+                                quiz: {
+                                    question: 'Which approach best reflects Stoic decision-making?',
+                                    choices: ['Following emotions', 'Considering virtue and wisdom', 'Maximizing pleasure', 'Avoiding all risks'],
+                                    correctIndex: 1,
+                                    explanation: 'Stoics make decisions based on virtue and wisdom, not emotions or pleasure-seeking.',
+                                    criticScore: 8
+                                }
+                            },
+                            {
+                                id: 'skill-6',
+                                name: 'Creating a Stoic Practice',
+                                explanation: 'Designing a personal daily Stoic practice routine.',
+                                bloomLevel: 'Create',
+                                quiz: {
+                                    question: 'What elements are essential for a daily Stoic practice?',
+                                    choices: ['Expensive equipment', 'Reflection and journaling', 'Complete isolation', 'Perfect conditions'],
+                                    correctIndex: 1,
+                                    explanation: 'A daily Stoic practice centers on reflection, journaling, and philosophical contemplation.',
+                                    criticScore: 9
+                                }
+                            },
+                            {
+                                id: 'skill-7',
+                                name: 'Modern Stoic Applications',
+                                explanation: 'Applying ancient Stoic wisdom to contemporary challenges.',
+                                bloomLevel: 'Create',
+                                quiz: {
+                                    question: 'How can Stoicism help with modern workplace stress?',
+                                    choices: ['By avoiding all challenges', 'By focusing on what you can control', 'By ignoring problems', 'By blaming others'],
+                                    correctIndex: 1,
+                                    explanation: 'Stoicism helps manage workplace stress by focusing on controllable aspects and maintaining perspective.',
+                                    criticScore: 9
+                                }
+                            }
+                        ]
+                    },
+                    'quantum-computing': {
+                        title: 'Quantum Computing Fundamentals',
+                        microSkills: [
+                            {
+                                id: 'qc-1',
+                                name: 'Quantum Bits (Qubits)',
+                                explanation: 'Understanding the basic unit of quantum information.',
+                                bloomLevel: 'Remember',
+                                quiz: {
+                                    question: 'What property allows qubits to exist in multiple states simultaneously?',
+                                    choices: ['Entanglement', 'Superposition', 'Decoherence', 'Interference'],
+                                    correctIndex: 1,
+                                    explanation: 'Superposition allows qubits to exist in a combination of 0 and 1 states simultaneously.',
+                                    criticScore: 9
+                                }
+                            }
+                        ]
+                    }
+                };
+            }
+
+            async generateCourse(topic) {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const normalized = topic.toLowerCase().replace(/\s+/g, '-');
+                if (this.courses[normalized]) {
+                    return this.courses[normalized];
+                }
+                
+                // Generate a basic course for any topic
+                return {
+                    title: `${topic}: Comprehensive Learning Path`,
+                    microSkills: Array.from({ length: 7 }, (_, i) => ({
+                        id: `skill-${i + 1}`,
+                        name: `${topic} Concept ${i + 1}`,
+                        explanation: `Understanding key concept ${i + 1} of ${topic}.`,
+                        bloomLevel: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create', 'Create'][i],
+                        quiz: {
+                            question: `What is important about ${topic} concept ${i + 1}?`,
+                            choices: [
+                                'Option A: Incorrect answer',
+                                'Option B: Correct answer',
+                                'Option C: Plausible distractor',
+                                'Option D: Another distractor'
+                            ],
+                            correctIndex: 1,
+                            explanation: `The correct answer demonstrates understanding of ${topic} concept ${i + 1}.`,
+                            criticScore: 8
+                        }
+                    }))
+                };
+            }
+        }
+
+        // Local Storage Database
+        class LocalDatabase {
+            constructor() {
+                this.prefix = 'coursebuilder_';
+            }
+
+            getUser() {
+                const data = localStorage.getItem(`${this.prefix}user`);
+                return data ? JSON.parse(data) : this.createUser();
+            }
+
+            createUser() {
+                const user = {
+                    id: 'user-' + Date.now(),
+                    xp: 0,
+                    level: 1,
+                    streak: 0,
+                    lastActiveDate: new Date().toISOString().split('T')[0],
+                    achievements: [],
+                    skills: {}
+                };
+                this.saveUser(user);
+                return user;
+            }
+
+            saveUser(user) {
+                localStorage.setItem(`${this.prefix}user`, JSON.stringify(user));
+            }
+
+            getCourse(courseId) {
+                const data = localStorage.getItem(`${this.prefix}course_${courseId}`);
+                return data ? JSON.parse(data) : null;
+            }
+
+            saveCourse(courseId, course) {
+                localStorage.setItem(`${this.prefix}course_${courseId}`, JSON.stringify(course));
+            }
+
+            getUserSkill(userId, skillId) {
+                const user = this.getUser();
+                return user.skills[skillId] || {
+                    knowledgeProb: 0.3,
+                    attempts: 0,
+                    correctAttempts: 0,
+                    lastAttempt: null,
+                    nextReviewAt: new Date().toISOString(),
+                    intervalDays: 1,
+                    easeFactor: 2.5
+                };
+            }
+
+            updateUserSkill(userId, skillId, updates) {
+                const user = this.getUser();
+                user.skills[skillId] = {
+                    ...this.getUserSkill(userId, skillId),
+                    ...updates
+                };
+                this.saveUser(user);
+            }
+
+            addXP(amount) {
+                const user = this.getUser();
+                user.xp += amount;
+                
+                // Level up logic
+                const nextLevelXP = user.level * 100;
+                if (user.xp >= nextLevelXP) {
+                    user.level += 1;
+                    user.xp = user.xp - nextLevelXP;
+                }
+                
+                this.saveUser(user);
+                return user;
+            }
+
+            updateStreak() {
+                const user = this.getUser();
+                const today = new Date().toISOString().split('T')[0];
+                
+                if (user.lastActiveDate === today) {
+                    return user;
+                }
+                
+                const lastActive = new Date(user.lastActiveDate);
+                const todayDate = new Date(today);
+                const daysDiff = Math.floor((todayDate - lastActive) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff === 1) {
+                    user.streak += 1;
+                } else if (daysDiff > 1) {
+                    user.streak = 1;
+                }
+                
+                user.lastActiveDate = today;
+                this.saveUser(user);
+                return user;
+            }
+
+            checkAchievements() {
+                const user = this.getUser();
+                const newAchievements = [];
+                
+                const achievements = [
+                    { id: 'first-correct', name: 'First Steps', condition: () => Object.values(user.skills).some(s => s.correctAttempts > 0) },
+                    { id: 'level-5', name: 'Rising Star', condition: () => user.level >= 5 },
+                    { id: 'streak-7', name: 'Week Warrior', condition: () => user.streak >= 7 },
+                    { id: 'master-skill', name: 'Skill Master', condition: () => Object.values(user.skills).some(s => s.knowledgeProb > 0.9) }
+                ];
+                
+                achievements.forEach(achievement => {
+                    if (!user.achievements.includes(achievement.id) && achievement.condition()) {
+                        user.achievements.push(achievement.id);
+                        newAchievements.push(achievement);
+                    }
+                });
+                
+                if (newAchievements.length > 0) {
+                    this.saveUser(user);
+                }
+                
+                return newAchievements;
+            }
+
+            getAnalytics() {
+                const user = this.getUser();
+                const skills = Object.entries(user.skills);
+                
+                return {
+                    totalSkills: skills.length,
+                    masteredSkills: skills.filter(([_, s]) => s.knowledgeProb > 0.8).length,
+                    totalAttempts: skills.reduce((sum, [_, s]) => sum + s.attempts, 0),
+                    accuracy: skills.length > 0 
+                        ? skills.reduce((sum, [_, s]) => sum + (s.attempts > 0 ? s.correctAttempts / s.attempts : 0), 0) / skills.length 
+                        : 0,
+                    streakDays: user.streak,
+                    currentLevel: user.level,
+                    totalXP: user.xp + (user.level - 1) * 100,
+                    skillProgress: skills.map(([id, skill]) => ({
+                        name: id.split('-').slice(-1)[0],
+                        knowledge: Math.round(skill.knowledgeProb * 100),
+                        attempts: skill.attempts
+                    }))
+                };
+            }
+        }
+
+        // Initialize services
+        const mockAPI = new MockOpenAI('mock-api-key');
+        const db = new LocalDatabase();
+
+        // Knowledge Tracking (Bayesian)
+        function updateKnowledge(current, isCorrect, confidence) {
+            const pLearn = 0.1;
+            const pGuess = 0.2;
+            const pSlip = 0.1;
+            
+            // Adjust based on confidence
+            const confAdjust = (confidence - 3) * 0.05;
+            const adjGuess = Math.max(0.1, Math.min(0.3, pGuess - confAdjust));
+            const adjSlip = Math.max(0.05, Math.min(0.2, pSlip + confAdjust));
+            
+            let newProb;
+            if (isCorrect) {
+                const likelihood = current * (1 - adjSlip) + (1 - current) * adjGuess;
+                newProb = (current * (1 - adjSlip)) / likelihood;
+            } else {
+                const likelihood = current * adjSlip + (1 - current) * (1 - adjGuess);
+                newProb = (current * adjSlip) / likelihood;
+            }
+            
+            // Learning update
+            const afterLearn = newProb + (1 - newProb) * pLearn;
+            return Math.max(0, Math.min(1, afterLearn));
+        }
+
+        // Spaced Repetition (SM2)
+        function calculateNextReview(current, quality) {
+            const { intervalDays, easeFactor } = current;
+            
+            let newInterval;
+            let newEaseFactor = easeFactor;
+            
+            if (quality >= 3) {
+                if (intervalDays === 1) {
+                    newInterval = 6;
+                } else {
+                    newInterval = Math.round(intervalDays * easeFactor);
+                }
+                newEaseFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)));
+            } else {
+                newInterval = 1;
+                newEaseFactor = Math.max(1.3, easeFactor - 0.2);
+            }
+            
+            const nextReviewAt = new Date();
+            nextReviewAt.setDate(nextReviewAt.getDate() + newInterval);
+            
+            return {
+                intervalDays: newInterval,
+                easeFactor: newEaseFactor,
+                nextReviewAt: nextReviewAt.toISOString()
+            };
+        }
+
+        // Main App Component
+        function App() {
+            const [currentPage, setCurrentPage] = useState('landing');
+            const [currentCourse, setCurrentCourse] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [user, setUser] = useState(() => db.getUser());
+            const [notification, setNotification] = useState(null);
+
+            useEffect(() => {
+                db.updateStreak();
+                checkForAchievements();
+            }, []);
+
+            const checkForAchievements = () => {
+                const newAchievements = db.checkAchievements();
+                if (newAchievements.length > 0) {
+                    setNotification({
+                        type: 'achievement',
+                        message: `Achievement Unlocked: ${newAchievements[0].name}!`
+                    });
+                }
+            };
+
+            const handleGenerateCourse = async (topic) => {
+                setLoading(true);
+                try {
+                    const course = await mockAPI.generateCourse(topic);
+                    const courseId = 'course-' + Date.now();
+                    db.saveCourse(courseId, course);
+                    setCurrentCourse({ id: courseId, ...course });
+                    setCurrentPage('course');
+                } catch (error) {
+                    setNotification({
+                        type: 'error',
+                        message: 'Failed to generate course. Please try again.'
+                    });
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const updateUserState = () => {
+                setUser(db.getUser());
+                checkForAchievements();
+            };
+
+            if (loading) {
+                return <LoadingScreen />;
+            }
+
+            // Notification Toast
+            useEffect(() => {
+                if (notification) {
+                    const timer = setTimeout(() => setNotification(null), 3000);
+                    return () => clearTimeout(timer);
+                }
+            }, [notification]);
+
+            return (
+                <>
+                    {notification && (
+                        <div className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg animate-fadeIn z-50 ${
+                            notification.type === 'achievement' ? 'bg-green-500' : 'bg-red-500'
+                        } text-white`}>
+                            {notification.message}
+                        </div>
+                    )}
+                    
+                    {currentPage === 'landing' && (
+                        <LandingPage 
+                            onGenerate={handleGenerateCourse} 
+                            onDashboard={() => setCurrentPage('dashboard')}
+                            onReview={() => setCurrentPage('review')}
+                            user={user}
+                        />
+                    )}
+                    
+                    {currentPage === 'course' && currentCourse && (
+                        <CoursePage 
+                            course={currentCourse}
+                            onBack={() => setCurrentPage('landing')}
+                            onComplete={() => {
+                                setCurrentPage('landing');
+                                setNotification({
+                                    type: 'achievement',
+                                    message: 'Course completed! Great job!'
+                                });
+                                window.confetti({
+                                    particleCount: 100,
+                                    spread: 70,
+                                    origin: { y: 0.6 }
+                                });
+                            }}
+                            updateUser={updateUserState}
+                        />
+                    )}
+                    
+                    {currentPage === 'dashboard' && (
+                        <DashboardPage 
+                            onBack={() => setCurrentPage('landing')}
+                            user={user}
+                        />
+                    )}
+                    
+                    {currentPage === 'review' && (
+                        <ReviewPage 
+                            onBack={() => setCurrentPage('landing')}
+                            updateUser={updateUserState}
+                        />
+                    )}
+                </>
+            );
+        }
+
+        // Landing Page Component
+        function LandingPage({ onGenerate, onDashboard, onReview, user }) {
+            const [topic, setTopic] = useState('');
+            const [currentExample, setCurrentExample] = useState(0);
+            
+            const examples = [
+                { title: 'Italian Pasta Shapes', emoji: '🍝' },
+                { title: 'Stoic Philosophy', emoji: '🏛️' },
+                { title: 'Quantum Computing', emoji: '⚛️' },
+                { title: 'Jazz Theory Basics', emoji: '🎵' },
+                { title: 'Japanese Tea Ceremony', emoji: '🍵' },
+                { title: 'Space Exploration', emoji: '🚀' }
+            ];
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setCurrentExample((prev) => (prev + 1) % examples.length);
+                }, 3000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-rose-50">
+                    <nav className="p-4 flex justify-between items-center">
+                        <div className="flex items-center gap-4">
+                            <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-rose-600 bg-clip-text text-transparent">
+                                Course Builder v1.2
+                            </h1>
+                            {user.streak > 0 && (
+                                <div className="flex items-center gap-1 bg-orange-100 px-3 py-1 rounded-full">
+                                    <span className="text-orange-600">🔥</span>
+                                    <span className="text-sm font-medium text-orange-700">{user.streak} day streak</span>
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={onReview}
+                                className="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                            >
+                                Review Mode
+                            </button>
+                            <button
+                                onClick={onDashboard}
+                                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all"
+                            >
+                                Dashboard
+                            </button>
+                        </div>
+                    </nav>
+
+                    <div className="flex items-center justify-center px-4 min-h-[calc(100vh-80px)]">
+                        <div className="max-w-2xl w-full">
+                            <div className="text-center mb-12">
+                                <h2 className="text-5xl font-bold mb-4">
+                                    Learn Anything in Minutes
+                                </h2>
+                                <p className="text-xl text-gray-600">
+                                    AI-powered micro-courses that adapt to your learning style
+                                </p>
+                                <div className="mt-4 flex items-center justify-center gap-2">
+                                    <span className="text-gray-500">Try:</span>
+                                    <span className="text-2xl">{examples[currentExample].emoji}</span>
+                                    <span className="text-gray-700 font-medium">{examples[currentExample].title}</span>
+                                </div>
+                            </div>
+                            
+                            <form onSubmit={(e) => { e.preventDefault(); onGenerate(topic); }} className="space-y-4">
+                                <input
+                                    type="text"
+                                    value={topic}
+                                    onChange={(e) => setTopic(e.target.value)}
+                                    placeholder="What do you want to learn?"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                                
+                                <button
+                                    type="submit"
+                                    disabled={!topic.trim()}
+                                    className="w-full bg-gradient-to-r from-indigo-600 to-rose-600 text-white px-6 py-3 rounded-lg font-medium hover:from-indigo-700 hover:to-rose-700 transition-all disabled:opacity-50"
+                                >
+                                    Start Learning →
+                                </button>
+                            </form>
+
+                            <div className="mt-8">
+                                <p className="text-center text-gray-600 mb-4">Popular topics</p>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                    {examples.map((example) => (
+                                        <button
+                                            key={example.title}
+                                            onClick={() => setTopic(example.title)}
+                                            className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-md transition-all"
+                                        >
+                                            <span className="text-2xl">{example.emoji}</span>
+                                            <span className="text-sm text-gray-700">{example.title}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="mt-12 grid grid-cols-3 gap-4 text-center">
+                                <div className="bg-white p-4 rounded-lg shadow-sm">
+                                    <div className="text-3xl font-bold text-indigo-600">{user.level}</div>
+                                    <div className="text-sm text-gray-600">Level</div>
+                                </div>
+                                <div className="bg-white p-4 rounded-lg shadow-sm">
+                                    <div className="text-3xl font-bold text-rose-600">{user.xp + (user.level - 1) * 100}</div>
+                                    <div className="text-sm text-gray-600">Total XP</div>
+                                </div>
+                                <div className="bg-white p-4 rounded-lg shadow-sm">
+                                    <div className="text-3xl font-bold text-orange-600">{user.achievements.length}</div>
+                                    <div className="text-sm text-gray-600">Achievements</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Loading Screen Component
+        function LoadingScreen() {
+            const steps = ['Analyzing topic...', 'Creating learning path...', 'Generating questions...'];
+            const [currentStep, setCurrentStep] = useState(0);
+
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setCurrentStep((prev) => (prev + 1) % steps.length);
+                }, 700);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-rose-50">
+                    <div className="text-center">
+                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-indigo-500 to-rose-500 rounded-full mb-4">
+                            <div className="animate-spin h-10 w-10 border-4 border-white border-t-transparent rounded-full"></div>
+                        </div>
+                        <h2 className="text-2xl font-bold mb-2">Building Your Course</h2>
+                        <p className="text-gray-600">{steps[currentStep]}</p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Course Page Component
+        function CoursePage({ course, onBack, onComplete, updateUser }) {
+            const [currentSkillIndex, setCurrentSkillIndex] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [showResult, setShowResult] = useState(false);
+            const [confidence, setConfidence] = useState(null);
+            const [showConfidenceModal, setShowConfidenceModal] = useState(false);
+            const [completedSkills, setCompletedSkills] = useState(new Set());
+
+            const currentSkill = course.microSkills[currentSkillIndex];
+            const progress = (completedSkills.size / course.microSkills.length) * 100;
+
+            useEffect(() => {
+                // Keyboard navigation
+                const handleKeyPress = (e) => {
+                    if (showConfidenceModal) {
+                        if (e.key >= '1' && e.key <= '5') {
+                            setConfidence(parseInt(e.key));
+                            setShowConfidenceModal(false);
+                            handleAnswer(selectedAnswer);
+                        }
+                    } else if (!showResult && e.key >= '1' && e.key <= '4') {
+                        const index = parseInt(e.key) - 1;
+                        if (index < currentSkill.quiz.choices.length) {
+                            handleAnswer(index);
+                        }
+                    }
+                };
+
+                window.addEventListener('keydown', handleKeyPress);
+                return () => window.removeEventListener('keydown', handleKeyPress);
+            }, [showConfidenceModal, showResult, selectedAnswer]);
+
+            const handleAnswer = (index) => {
+                if (!confidence) {
+                    setSelectedAnswer(index);
+                    setShowConfidenceModal(true);
+                    return;
+                }
+
+                setSelectedAnswer(index);
+                setShowResult(true);
+                
+                const isCorrect = index === currentSkill.quiz.correctIndex;
+                const skillId = `${course.id}-${currentSkill.id}`;
+                const currentKnowledge = db.getUserSkill('current', skillId);
+                
+                // Update knowledge
+                const newKnowledge = updateKnowledge(currentKnowledge.knowledgeProb, isCorrect, confidence);
+                
+                // Update spaced repetition
+                const quality = isCorrect ? (confidence >= 4 ? 5 : 3) : 1;
+                const repetition = calculateNextReview(currentKnowledge, quality);
+                
+                // Save to database
+                db.updateUserSkill('current', skillId, {
+                    knowledgeProb: newKnowledge,
+                    attempts: currentKnowledge.attempts + 1,
+                    correctAttempts: currentKnowledge.correctAttempts + (isCorrect ? 1 : 0),
+                    lastAttempt: new Date().toISOString(),
+                    ...repetition
+                });
+                
+                if (isCorrect) {
+                    db.addXP(10);
+                    setCompletedSkills(prev => new Set([...prev, currentSkill.id]));
+                }
+                
+                updateUser();
+            };
+
+            const handleNext = () => {
+                if (currentSkillIndex < course.microSkills.length - 1) {
+                    setCurrentSkillIndex(prev => prev + 1);
+                    setSelectedAnswer(null);
+                    setShowResult(false);
+                    setConfidence(null);
+                } else if (completedSkills.size === course.microSkills.length) {
+                    onComplete();
+                }
+            };
+
+            const handleSkip = () => {
+                if (currentSkillIndex < course.microSkills.length - 1) {
+                    setCurrentSkillIndex(prev => prev + 1);
+                    setSelectedAnswer(null);
+                    setShowResult(false);
+                    setConfidence(null);
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-rose-50">
+                    <div className="max-w-4xl mx-auto px-4 py-8">
+                        <button onClick={onBack} className="text-indigo-600 hover:text-indigo-800 mb-4">
+                            ← Back to home
+                        </button>
+                        
+                        <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
+                        
+                        {/* Progress Bar */}
+                        <div className="mb-6">
+                            <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                <span>Progress: {completedSkills.size}/{course.microSkills.length} skills</span>
+                                <span>{Math.round(progress)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-indigo-500 to-rose-500 transition-all duration-500"
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Skill Navigation */}
+                        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+                            {course.microSkills.map((skill, index) => (
+                                <button
+                                    key={skill.id}
+                                    onClick={() => setCurrentSkillIndex(index)}
+                                    className={`flex-shrink-0 px-3 py-1 rounded-full text-sm transition-all ${
+                                        index === currentSkillIndex
+                                            ? 'bg-indigo-600 text-white'
+                                            : completedSkills.has(skill.id)
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-gray-200 text-gray-600'
+                                    }`}
+                                >
+                                    {index + 1}. {skill.name}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Quiz Card */}
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <div className="flex items-start justify-between mb-3">
+                                <h3 className="text-xl font-bold">{currentSkill.name}</h3>
+                                <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                    {currentSkill.bloomLevel}
+                                </span>
+                            </div>
+                            
+                            <p className="text-gray-600 mb-4">{currentSkill.explanation}</p>
+                            
+                            <div className="mb-4">
+                                <p className="font-medium mb-3">{currentSkill.quiz.question}</p>
+                                <div className="space-y-2">
+                                    {currentSkill.quiz.choices.map((choice, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => handleAnswer(index)}
+                                            disabled={showResult}
+                                            className={`w-full text-left p-3 rounded-lg border transition-all ${
+                                                showResult
+                                                    ? index === currentSkill.quiz.correctIndex
+                                                        ? 'bg-green-100 border-green-500'
+                                                        : index === selectedAnswer
+                                                        ? 'bg-red-100 border-red-500'
+                                                        : 'bg-gray-50 border-gray-300'
+                                                    : 'bg-white border-gray-300 hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <span className="flex items-center gap-3">
+                                                <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                                                    {index + 1}
+                                                </span>
+                                                {choice}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {showResult && (
+                                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                                    <p className="text-sm text-blue-800">
+                                        <strong>Explanation:</strong> {currentSkill.quiz.explanation}
+                                    </p>
+                                    <div className="mt-4 flex gap-3">
+                                        <button
+                                            onClick={handleNext}
+                                            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
+                                        >
+                                            {currentSkillIndex < course.microSkills.length - 1 ? 'Next Question →' : 'Complete Course 🎉'}
+                                        </button>
+                                        {selectedAnswer !== currentSkill.quiz.correctIndex && (
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAnswer(null);
+                                                    setShowResult(false);
+                                                    setConfidence(null);
+                                                }}
+                                                className="text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-50"
+                                            >
+                                                Try Again
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {!showResult && (
+                                <div className="mt-4 text-center">
+                                    <button
+                                        onClick={handleSkip}
+                                        className="text-gray-500 hover:text-gray-700 text-sm"
+                                    >
+                                        Skip this question
+                                    </button>
+                                </div>
+                            )}
+
+                            {currentSkill.quiz.criticScore && (
+                                <div className="mt-2 text-xs text-gray-400 text-right">
+                                    Quality score: {currentSkill.quiz.criticScore}/10
+                                </div>
+                            )}
+                        </div>
+
+                        {showConfidenceModal && (
+                            <ConfidenceModal
+                                onSelect={(level) => {
+                                    setConfidence(level);
+                                    setShowConfidenceModal(false);
+                                    handleAnswer(selectedAnswer);
+                                }}
+                                onClose={() => setShowConfidenceModal(false)}
+                            />
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Confidence Modal Component
+        function ConfidenceModal({ onSelect, onClose }) {
+            const levels = [
+                { level: 1, label: 'Just guessing', color: 'red' },
+                { level: 2, label: 'Not very sure', color: 'orange' },
+                { level: 3, label: 'Somewhat confident', color: 'yellow' },
+                { level: 4, label: 'Pretty confident', color: 'blue' },
+                { level: 5, label: 'Very confident', color: 'green' },
+            ];
+
+            return (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4" onClick={onClose}>
+                    <div className="bg-white rounded-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-lg font-bold mb-4">How confident are you?</h3>
+                        <p className="text-gray-600 mb-6">Rate your confidence before seeing if you're correct</p>
+                        <div className="space-y-3">
+                            {levels.map(({ level, label }) => (
+                                <button
+                                    key={level}
+                                    onClick={() => onSelect(level)}
+                                    className="w-full p-3 rounded-lg border-2 hover:border-indigo-500 transition-all flex items-center justify-between"
+                                >
+                                    <span>{label}</span>
+                                    <span className="text-gray-400">{level}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Dashboard Page Component
+        function DashboardPage({ onBack, user }) {
+            const analytics = db.getAnalytics();
+            
+            const chartData = analytics.skillProgress.slice(0, 10);
+            const streakData = Array.from({ length: 7 }, (_, i) => {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                return {
+                    day: date.toLocaleDateString('en', { weekday: 'short' }),
+                    active: i < user.streak ? 1 : 0
+                };
+            }).reverse();
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-rose-50 px-4 py-8">
+                    <div className="max-w-6xl mx-auto">
+                        <button onClick={onBack} className="text-indigo-600 hover:text-indigo-800 mb-4">
+                            ← Back to home
+                        </button>
+                        
+                        <h1 className="text-3xl font-bold mb-8">Learning Dashboard</h1>
+                        
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                <div className="text-3xl font-bold text-indigo-600">{analytics.totalSkills}</div>
+                                <div className="text-sm text-gray-600">Skills Learned</div>
+                            </div>
+                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                <div className="text-3xl font-bold text-green-600">{analytics.masteredSkills}</div>
+                                <div className="text-sm text-gray-600">Skills Mastered</div>
+                            </div>
+                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                <div className="text-3xl font-bold text-blue-600">{Math.round(analytics.accuracy * 100)}%</div>
+                                <div className="text-sm text-gray-600">Accuracy</div>
+                            </div>
+                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                <div className="text-3xl font-bold text-orange-600">{analytics.streakDays}</div>
+                                <div className="text-sm text-gray-600">Day Streak</div>
+                            </div>
+                        </div>
+
+                        {/* Charts */}
+                        <div className="grid md:grid-cols-2 gap-6">
+                            {/* Skill Progress Chart */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                <h3 className="text-lg font-semibold mb-4">Skill Progress</h3>
+                                {chartData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={200}>
+                                        <BarChart data={chartData}>
+                                            <CartesianGrid strokeDasharray="3 3" />
+                                            <XAxis dataKey="name" />
+                                            <YAxis />
+                                            <Tooltip />
+                                            <Bar dataKey="knowledge" fill="#6366f1" />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <p className="text-gray-500 text-center py-8">No skill data yet</p>
+                                )}
+                            </div>
+
+                            {/* Streak Chart */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                <h3 className="text-lg font-semibold mb-4">Weekly Activity</h3>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <LineChart data={streakData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="day" />
+                                        <YAxis domain={[0, 1]} ticks={[0, 1]} />
+                                        <Tooltip />
+                                        <Line type="monotone" dataKey="active" stroke="#f97316" strokeWidth={2} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Achievements */}
+                        <div className="mt-8 bg-white p-6 rounded-xl shadow-sm">
+                            <h3 className="text-lg font-semibold mb-4">Achievements</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {[
+                                    { id: 'first-correct', name: 'First Steps', icon: '🏃', unlocked: user.achievements.includes('first-correct') },
+                                    { id: 'level-5', name: 'Rising Star', icon: '⭐', unlocked: user.achievements.includes('level-5') },
+                                    { id: 'streak-7', name: 'Week Warrior', icon: '🗓️', unlocked: user.achievements.includes('streak-7') },
+                                    { id: 'master-skill', name: 'Skill Master', icon: '🎓', unlocked: user.achievements.includes('master-skill') }
+                                ].map(achievement => (
+                                    <div
+                                        key={achievement.id}
+                                        className={`p-4 rounded-lg text-center ${
+                                            achievement.unlocked
+                                                ? 'bg-gradient-to-br from-indigo-100 to-rose-100'
+                                                : 'bg-gray-100'
+                                        }`}
+                                    >
+                                        <div className="text-3xl mb-2">{achievement.icon}</div>
+                                        <div className={`text-sm font-medium ${
+                                            achievement.unlocked ? 'text-gray-800' : 'text-gray-400'
+                                        }`}>
+                                            {achievement.name}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Review Page Component
+        function ReviewPage({ onBack, updateUser }) {
+            const [reviewQueue, setReviewQueue] = useState([]);
+            const [currentReview, setCurrentReview] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                loadReviewQueue();
+            }, []);
+
+            const loadReviewQueue = () => {
+                const user = db.getUser();
+                const now = new Date();
+                const dueSkills = [];
+                
+                Object.entries(user.skills).forEach(([skillId, skill]) => {
+                    if (new Date(skill.nextReviewAt) <= now && skill.attempts > 0) {
+                        // Get course and skill info from localStorage
+                        const courseId = skillId.split('-skill-')[0];
+                        const course = db.getCourse(courseId);
+                        if (course) {
+                            const microSkill = course.microSkills.find(s => skillId.includes(s.id));
+                            if (microSkill) {
+                                dueSkills.push({
+                                    skillId,
+                                    courseId,
+                                    skill: microSkill,
+                                    knowledge: skill.knowledgeProb,
+                                    daysSinceReview: Math.floor((now - new Date(skill.lastAttempt)) / (1000 * 60 * 60 * 24))
+                                });
+                            }
+                        }
+                    }
+                });
+                
+                // Sort by urgency (knowledge level and days since review)
+                dueSkills.sort((a, b) => {
+                    const urgencyA = a.daysSinceReview * (1 - a.knowledge);
+                    const urgencyB = b.daysSinceReview * (1 - b.knowledge);
+                    return urgencyB - urgencyA;
+                });
+                
+                setReviewQueue(dueSkills);
+                setCurrentReview(dueSkills[0] || null);
+                setLoading(false);
+            };
+
+            if (loading) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+                            <p className="text-gray-600">Loading review queue...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!currentReview) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-rose-50 px-4 py-8">
+                        <div className="max-w-4xl mx-auto">
+                            <button onClick={onBack} className="text-indigo-600 hover:text-indigo-800 mb-4">
+                                ← Back to home
+                            </button>
+                            
+                            <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+                                <div className="text-6xl mb-4">🎉</div>
+                                <h2 className="text-2xl font-bold mb-2">All caught up!</h2>
+                                <p className="text-gray-600">No skills need review right now. Check back tomorrow!</p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-rose-50 px-4 py-8">
+                    <div className="max-w-4xl mx-auto">
+                        <button onClick={onBack} className="text-indigo-600 hover:text-indigo-800 mb-4">
+                            ← Back to home
+                        </button>
+                        
+                        <h1 className="text-3xl font-bold mb-4">Review Mode</h1>
+                        <p className="text-gray-600 mb-6">
+                            {reviewQueue.length} skill{reviewQueue.length !== 1 ? 's' : ''} to review
+                        </p>
+                        
+                        <QuizCard
+                            skill={currentReview.skill}
+                            onAnswer={(isCorrect, confidence) => {
+                                const skillId = currentReview.skillId;
+                                const currentKnowledge = db.getUserSkill('current', skillId);
+                                
+                                // Update knowledge
+                                const newKnowledge = updateKnowledge(currentKnowledge.knowledgeProb, isCorrect, confidence);
+                                
+                                // Update spaced repetition
+                                const quality = isCorrect ? (confidence >= 4 ? 5 : 3) : 1;
+                                const repetition = calculateNextReview(currentKnowledge, quality);
+                                
+                                // Save to database
+                                db.updateUserSkill('current', skillId, {
+                                    knowledgeProb: newKnowledge,
+                                    attempts: currentKnowledge.attempts + 1,
+                                    correctAttempts: currentKnowledge.correctAttempts + (isCorrect ? 1 : 0),
+                                    lastAttempt: new Date().toISOString(),
+                                    ...repetition
+                                });
+                                
+                                if (isCorrect) {
+                                    db.addXP(5); // Less XP for reviews
+                                }
+                                
+                                updateUser();
+                                
+                                // Move to next review
+                                const remainingQueue = reviewQueue.slice(1);
+                                setReviewQueue(remainingQueue);
+                                setCurrentReview(remainingQueue[0] || null);
+                            }}
+                        />
+                    </div>
+                </div>
+            );
+        }
+
+        // Quiz Card Component (Reusable)
+        function QuizCard({ skill, onAnswer }) {
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [showResult, setShowResult] = useState(false);
+            const [confidence, setConfidence] = useState(null);
+            const [showConfidenceModal, setShowConfidenceModal] = useState(false);
+
+            const handleAnswer = (index) => {
+                if (!confidence) {
+                    setSelectedAnswer(index);
+                    setShowConfidenceModal(true);
+                    return;
+                }
+
+                setSelectedAnswer(index);
+                setShowResult(true);
+                
+                const isCorrect = index === skill.quiz.correctIndex;
+                
+                setTimeout(() => {
+                    onAnswer(isCorrect, confidence);
+                    setSelectedAnswer(null);
+                    setShowResult(false);
+                    setConfidence(null);
+                }, 2000);
+            };
+
+            return (
+                <>
+                    <div className="bg-white rounded-xl shadow-lg p-6">
+                        <div className="flex items-start justify-between mb-3">
+                            <h3 className="text-xl font-bold">{skill.name}</h3>
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                                {skill.bloomLevel}
+                            </span>
+                        </div>
+                        
+                        <p className="text-gray-600 mb-4">{skill.explanation}</p>
+                        
+                        <div className="mb-4">
+                            <p className="font-medium mb-3">{skill.quiz.question}</p>
+                            <div className="space-y-2">
+                                {skill.quiz.choices.map((choice, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleAnswer(index)}
+                                        disabled={showResult}
+                                        className={`w-full text-left p-3 rounded-lg border transition-all ${
+                                            showResult
+                                                ? index === skill.quiz.correctIndex
+                                                    ? 'bg-green-100 border-green-500'
+                                                    : index === selectedAnswer
+                                                    ? 'bg-red-100 border-red-500'
+                                                    : 'bg-gray-50 border-gray-300'
+                                                : 'bg-white border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                    >
+                                        <span className="flex items-center gap-3">
+                                            <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                                                {index + 1}
+                                            </span>
+                                            {choice}
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {showResult && (
+                            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                                <p className="text-sm text-blue-800">
+                                    <strong>Explanation:</strong> {skill.quiz.explanation}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {showConfidenceModal && (
+                        <ConfidenceModal
+                            onSelect={(level) => {
+                                setConfidence(level);
+                                setShowConfidenceModal(false);
+                                handleAnswer(selectedAnswer);
+                            }}
+                            onClose={() => setShowConfidenceModal(false)}
+                        />
+                    )}
+                </>
+            );
+        }
+
+        // Render the app
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</body>
+</html>

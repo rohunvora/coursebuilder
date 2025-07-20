@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build && npx prisma generate && npx prisma db push",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "env": {
+    "DATABASE_URL": "@database_url",
+    "OPENAI_API_KEY": "@openai_api_key"
+  }
+}
