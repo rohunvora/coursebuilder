@@ -51,7 +51,7 @@ class ApiClient {
       await this.logDebug('api_get_success', { path, status: response.status });
       return data;
     } catch (error) {
-      await this.logDebug('api_get_error', { path, error: error.message });
+      await this.logDebug('api_get_error', { path, error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -72,7 +72,7 @@ class ApiClient {
       await this.logDebug('api_post_success', { path, status: response.status });
       return data;
     } catch (error) {
-      await this.logDebug('api_post_error', { path, body, error: error.message });
+      await this.logDebug('api_post_error', { path, body, error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -96,7 +96,8 @@ class ApiClient {
       return result;
     } catch (error) {
       if (toastId) {
-        toast.error(messages.error || error.message || 'Something went wrong', { id: toastId });
+        const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
+        toast.error(messages.error || errorMessage, { id: toastId });
       }
       throw error;
     }
