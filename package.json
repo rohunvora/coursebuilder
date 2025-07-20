@@ -10,7 +10,7 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
     "test": "jest --config config/jest.config.js",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma db push && next build && npm run seed-achievements",
+    "vercel-build": "./scripts/vercel-build.sh",
     "seed-achievements": "node scripts/seed-achievements.js",
     "test:unit": "jest --config config/jest.config.js tests/unit",
     "test:integration": "jest --config config/jest.config.js tests/integration",

@@ -36,23 +36,44 @@ AI-powered micro-learning platform that transforms any topic into a gamified, Du
 
 ## Quick Start
 
-1. **Install dependencies**
+### Prerequisites
+- Node.js 18+ 
+- Supabase account (free tier works)
+- OpenAI API key
+
+### Setup
+
+1. **Clone and install**
 ```bash
+git clone https://github.com/rohunvora/coursebuilder.git
+cd coursebuilder
 npm install
 ```
 
-2. **Configure environment**
+2. **Set up Supabase database**
+- Create a new project at [supabase.com](https://supabase.com)
+- Get your database URL from Settings → Database → Connection string (Pooling)
+- See [SUPABASE-SETUP.md](./SUPABASE-SETUP.md) for detailed instructions
+
+3. **Configure environment**
 ```bash
-cp .env.example .env
-# Add your OpenAI API key to .env
+cp .env.example .env.local
+# Edit .env.local with:
+# DATABASE_URL="your-supabase-pooling-url"
+# OPENAI_API_KEY="your-openai-key"
 ```
 
-3. **Run development server**
+4. **Push database schema**
+```bash
+npx prisma db push
+```
+
+5. **Run development server**
 ```bash
 npm run dev
 ```
 
-4. **Open browser**
+6. **Open browser**
 Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## Acceptance Test
