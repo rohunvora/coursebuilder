@@ -92,7 +92,7 @@ Return JSON only:
   while (attempts < 2) {
     try {
       const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo', // Use stable model
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: `Create a ${bloom.level}-level question about ${skillName} in ${topic}.` }
@@ -117,7 +117,7 @@ Return JSON only:
 
       // Validate with critic
       const criticCompletion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo', // Use stable model
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: criticPrompt },
           { role: 'user', content: JSON.stringify(question) }
@@ -179,7 +179,7 @@ Return JSON only:
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Create a course structure for: ${topic}` }

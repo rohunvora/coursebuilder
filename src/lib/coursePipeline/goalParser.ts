@@ -33,7 +33,7 @@ export async function parseGoal(userInput: string): Promise<ParsedGoal> {
     console.log('[Goal Parser] Parsing:', userInput)
     
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo', // Use stable model instead of gpt-4o
+      model: 'gpt-4o', // Latest GPT-4 model (May 2024)
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Parse this learning goal: ${userInput}` }
