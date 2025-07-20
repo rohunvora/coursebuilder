@@ -11,34 +11,52 @@
    - Database Password: (save this!)
    - Region: Choose closest to your users
 
-### 2. Get Database URL
+### 2. Get Configuration Details
 
-Once your project is created:
+Once your project is created, go to Settings → API and copy:
 
-1. Go to Settings → Database
-2. Copy the **Connection string** under "Connection Pooling"
-3. It should look like:
+1. **Project URL**: `https://[project-ref].supabase.co`
+2. **Anon/Public Key**: `eyJ...` (safe for client-side)
+3. **Service Role Key**: `eyJ...` (server-side only, keep secret!)
+
+Then go to Settings → Database and copy:
+
+4. **Connection String** (use "Connection Pooling" mode):
    ```
    postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
    ```
 
-### 3. Configure Vercel
+### 3. Configure Local Development
 
-In your Vercel project settings:
-
-1. Go to Settings → Environment Variables
-2. Add:
-   ```
-   DATABASE_URL = "your-supabase-connection-string"
-   OPENAI_API_KEY = "your-openai-key"
+1. Copy `.env.local.example` to `.env.local`:
+   ```bash
+   cp .env.local.example .env.local
    ```
 
-### 4. Update Local Development
+2. Fill in your Supabase details in `.env.local`:
+   ```env
+   DATABASE_URL="your-connection-pooling-url"
+   OPENAI_API_KEY="your-openai-key"
+   NEXT_PUBLIC_SUPABASE_URL="https://[project-ref].supabase.co"
+   NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."
+   SUPABASE_SERVICE_ROLE_KEY="eyJ..."
+   ```
 
-Create `.env.local`:
-```env
-DATABASE_URL="your-supabase-connection-string"
-OPENAI_API_KEY="your-openai-key"
+3. Set up the database:
+   ```bash
+   npm run setup-db:seed
+   ```
+
+### 4. Configure Vercel Deployment
+
+In your Vercel project settings (Settings → Environment Variables), add:
+
+```
+DATABASE_URL = "your-supabase-connection-string"
+OPENAI_API_KEY = "your-openai-key"
+NEXT_PUBLIC_SUPABASE_URL = "https://[project-ref].supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJ..."
+SUPABASE_SERVICE_ROLE_KEY = "eyJ..."
 ```
 
 ## Database Schema

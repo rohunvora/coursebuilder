@@ -1,8 +1,12 @@
-# Course Builder - Vercel Deployment Guide
+# Course Builder - Deployment Guide
 
 ## Overview
 
 This guide explains how to deploy Course Builder to Vercel with full debugging capabilities, test user management, and proper environment configuration.
+
+> **📚 Related Guides:**
+> - [SUPABASE-SETUP.md](./SUPABASE-SETUP.md) - Complete Supabase database setup
+> - [VERCEL-DEPLOYMENT.md](./VERCEL-DEPLOYMENT.md) - Detailed Vercel configuration
 
 ## Quick Deploy
 
@@ -30,9 +34,12 @@ In your Vercel dashboard, add these environment variables:
 ```env
 # Required
 OPENAI_API_KEY=your-openai-api-key
-DATABASE_URL=your-database-url
+DATABASE_URL=your-supabase-connection-pooling-url
+NEXT_PUBLIC_SUPABASE_URL=https://[project-ref].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 # Optional (defaults shown)
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 NEXT_PUBLIC_DEBUG_MODE=true
 NEXT_PUBLIC_TEST_MODE=true
 NEXT_PUBLIC_ENABLE_ACHIEVEMENTS=true

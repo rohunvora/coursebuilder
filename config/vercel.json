@@ -1,9 +1,7 @@
 {
-  "buildCommand": "npm run build && npx prisma generate && npx prisma db push",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run vercel-build",
   "framework": "nextjs",
   "outputDirectory": ".next",
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "OPENAI_API_KEY": "@openai_api_key"
-  }
+  "installCommand": "npm install"
 }

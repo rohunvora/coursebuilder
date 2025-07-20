@@ -57,15 +57,14 @@ npm install
 
 3. **Configure environment**
 ```bash
-cp .env.example .env.local
-# Edit .env.local with:
-# DATABASE_URL="your-supabase-pooling-url"
-# OPENAI_API_KEY="your-openai-key"
+cp .env.local.example .env.local
+# Edit .env.local with your Supabase and OpenAI credentials
 ```
 
-4. **Push database schema**
+4. **Set up database**
 ```bash
-npx prisma db push
+npm run setup-db:seed
+# This will push the schema and seed achievements
 ```
 
 5. **Run development server**
