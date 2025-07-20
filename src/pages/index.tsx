@@ -37,6 +37,9 @@ export default function Home() {
     setLoading(true)
 
     try {
+      // Show initial status
+      const toastId = toast.loading('Parsing your learning goal...')
+      
       // Get or create user
       const userId = localStorage.getItem('userId') || `user-${Date.now()}`
       localStorage.setItem('userId', userId)
@@ -63,10 +66,16 @@ export default function Home() {
           // If we can't parse the error response, use the default message
         }
         
+        toast.error(errorMessage, { id: toastId })
         throw new Error(errorMessage)
       }
 
+      // Update status
+      toast.loading('Generating personalized questions...', { id: toastId })
+      
       const data = await response.json()
+      toast.success('Course ready! Taking you there now...', { id: toastId })
+      
       router.push(`/course/${data.courseId}?generating=true`)
     } catch (error) {
       // Provide user-friendly error messages
@@ -82,7 +91,10 @@ export default function Home() {
         }
       }
       
-      toast.error(message)
+      // Don't show another error toast if we already showed one
+      if (!message.includes('Unable to create')) {
+        toast.error(message)
+      }
       setLoading(false)
     }
   }
