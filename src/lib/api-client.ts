@@ -1,5 +1,10 @@
 import { config, getApiUrl } from './config';
-import toast from 'react-hot-toast';
+
+// Import toast conditionally to avoid SSR issues
+let toast: any = null;
+if (typeof window !== 'undefined') {
+  toast = require('react-hot-toast').toast;
+}
 
 // Types for API responses
 interface ApiResponse<T = any> {
@@ -95,7 +100,7 @@ class ApiClient {
       }
       return result;
     } catch (error) {
-      if (toastId) {
+      if (toastId && toast) {
         const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
         toast.error(messages.error || errorMessage, { id: toastId });
       }
