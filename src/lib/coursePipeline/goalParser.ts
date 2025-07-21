@@ -1,8 +1,11 @@
 import OpenAI from 'openai'
 import { env } from '../env'
 
+// Log API key status (without revealing the key)
+console.log('[OpenAI Init] API Key status:', env.OPENAI_API_KEY ? 'SET' : 'NOT SET')
+
 const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
+  apiKey: env.OPENAI_API_KEY || 'sk-dummy', // Prevent OpenAI client from throwing on init
 })
 
 export interface ParsedGoal {
@@ -31,6 +34,11 @@ Return JSON only:
 export async function parseGoal(userInput: string): Promise<ParsedGoal> {
   try {
     console.log('[Goal Parser] Parsing:', userInput)
+    
+    // Check if API key is properly set
+    if (!env.OPENAI_API_KEY || env.OPENAI_API_KEY === 'sk-dummy') {
+      throw new Error('OpenAI API key is not configured. Please set OPENAI_API_KEY environment variable.')
+    }
     
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o', // Latest GPT-4 model (May 2024)

@@ -136,7 +136,17 @@ export const courseApi = {
 export const userApi = {
   getDashboard: () =>
     api.withStatus(
-      () => api.get('/api/user/dashboard'),
+      () => {
+        const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+        if (!userId) {
+          throw new Error('No user ID found');
+        }
+        return api.get('/api/user/dashboard', {
+          headers: {
+            'x-user-id': userId
+          }
+        });
+      },
       {
         loading: 'Loading dashboard...',
         success: 'Dashboard loaded',

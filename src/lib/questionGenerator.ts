@@ -2,8 +2,11 @@ import OpenAI from 'openai'
 import { env } from './env'
 import { nanoid } from 'nanoid'
 
+// Log API key status (without revealing the key)
+console.log('[Question Generator] API Key status:', env.OPENAI_API_KEY ? 'SET' : 'NOT SET')
+
 const openai = new OpenAI({
-  apiKey: env.OPENAI_API_KEY,
+  apiKey: env.OPENAI_API_KEY || 'sk-dummy', // Prevent OpenAI client from throwing on init
 })
 
 export interface Question {
@@ -84,6 +87,11 @@ Return JSON only:
   "correctIndex": 0-3,
   "explanation": "..."
 }`
+
+  // Check if API key is properly set
+  if (!env.OPENAI_API_KEY || env.OPENAI_API_KEY === 'sk-dummy') {
+    throw new Error('OpenAI API key is not configured. Please set OPENAI_API_KEY environment variable.')
+  }
 
   let attempts = 0
   let bestQuestion: Question | null = null

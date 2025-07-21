@@ -25,7 +25,13 @@ export default async function handler(
   // Validate OpenAI API key
   if (!process.env.OPENAI_API_KEY) {
     console.error('[Generate API] OpenAI API key not configured')
-    return res.status(500).json({ message: 'Course generation service not configured. Please check server settings.' })
+    return res.status(500).json({ 
+      message: 'Course generation service not configured. Please check server settings.',
+      debug: process.env.NODE_ENV === 'development' ? {
+        hint: 'OPENAI_API_KEY environment variable is missing',
+        checkUrl: '/api/test/diagnose'
+      } : undefined
+    })
   }
 
   const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'anonymous'
