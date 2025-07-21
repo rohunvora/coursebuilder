@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 // Simple test page to verify basic functionality
 export default function TestPage() {
   return (
@@ -9,7 +11,9 @@ export default function TestPage() {
         <p>Time: {new Date().toISOString()}</p>
       </div>
       <div className="mt-4">
-        <a href="/" className="text-blue-600 underline">Go to Home</a>
+        <Link href="/" className="text-blue-600 underline">
+          Go to Home
+        </Link>
       </div>
     </div>
   )
