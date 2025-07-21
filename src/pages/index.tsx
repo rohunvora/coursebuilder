@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
+import { courseApi } from '@/lib/api-client'
 
 const examples = [
   { title: 'Italian Pasta Shapes', emoji: '🍝' },
@@ -35,66 +36,28 @@ export default function Home() {
     }
 
     setLoading(true)
+    console.log('[Home] Starting course generation for topic:', topic)
 
     try {
-      // Show initial status
-      const toastId = toast.loading('Parsing your learning goal...')
-      
       // Get or create user
-      const userId = localStorage.getItem('userId') || `user-${Date.now()}`
-      localStorage.setItem('userId', userId)
-
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          topic: topic.trim(),
-          userId 
-        })
-      })
-
-      if (!response.ok) {
-        let errorMessage = 'Unable to create your course right now. Please try again.'
-        
-        try {
-          const error = await response.json()
-          // Use the server's error message if it's user-friendly
-          if (error.message && !error.message.includes('JSON') && !error.message.includes('undefined')) {
-            errorMessage = error.message
-          }
-        } catch {
-          // If we can't parse the error response, use the default message
-        }
-        
-        toast.error(errorMessage, { id: toastId })
-        throw new Error(errorMessage)
+      let userId = localStorage.getItem('userId')
+      if (!userId) {
+        userId = `user-${Date.now()}`
+        localStorage.setItem('userId', userId)
+        console.log('[Home] Created new userId:', userId)
+      } else {
+        console.log('[Home] Using existing userId:', userId)
       }
 
-      // Update status
-      toast.loading('Generating personalized questions...', { id: toastId })
+      // Use the api client which handles errors properly
+      const data = await courseApi.generate(topic.trim(), userId)
+      console.log('[Home] Course generated successfully:', data)
       
-      const data = await response.json()
-      toast.success('Course ready! Taking you there now...', { id: toastId })
-      
+      // Navigate to the course
       router.push(`/course/${data.courseId}?generating=true`)
     } catch (error) {
-      // Provide user-friendly error messages
-      let message = 'Something went wrong. Please try again.'
-      
-      if (error instanceof Error) {
-        if (error.message.includes('fetch')) {
-          message = 'Unable to connect to the server. Please check your internet connection.'
-        } else if (error.message.includes('JSON')) {
-          message = 'The server returned an invalid response. Please try again.'
-        } else {
-          message = error.message
-        }
-      }
-      
-      // Don't show another error toast if we already showed one
-      if (!message.includes('Unable to create')) {
-        toast.error(message)
-      }
+      console.error('[Home] Error generating course:', error)
+      // Error toast is already shown by api.withStatus
       setLoading(false)
     }
   }

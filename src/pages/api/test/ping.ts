@@ -1,20 +1,24 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(
+export default function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
+  console.log('[Ping] Request received:', {
     method: req.method,
-    headers: {
-      'content-type': req.headers['content-type'],
-      'x-user-id': req.headers['x-user-id'],
-    },
-    env: {
-      NODE_ENV: process.env.NODE_ENV,
-      VERCEL: process.env.VERCEL || false,
+    headers: req.headers,
+    query: req.query,
+    body: req.body,
+  })
+  
+  res.status(200).json({ 
+    pong: true,
+    timestamp: new Date().toISOString(),
+    receivedData: {
+      method: req.method,
+      hasBody: !!req.body,
+      bodyKeys: req.body ? Object.keys(req.body) : [],
+      queryKeys: Object.keys(req.query),
     }
   })
 }

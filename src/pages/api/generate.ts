@@ -10,16 +10,30 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  console.log('[Generate API] Request received:', { method: req.method, body: req.body })
+  console.log('[Generate API] Request received:', { 
+    method: req.method, 
+    body: req.body,
+    headers: {
+      'content-type': req.headers['content-type'],
+      'x-user-id': req.headers['x-user-id']
+    }
+  })
   
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
   const { topic, userId } = req.body
+  console.log('[Generate API] Parsed params:', { topic, userId })
 
   if (!topic || typeof topic !== 'string') {
+    console.error('[Generate API] Invalid topic:', topic)
     return res.status(400).json({ message: 'Topic is required' })
+  }
+  
+  if (!userId || typeof userId !== 'string') {
+    console.error('[Generate API] Invalid userId:', userId)
+    return res.status(400).json({ message: 'User ID is required' })
   }
   
   // Validate OpenAI API key
@@ -64,10 +78,19 @@ export default async function handler(
     }
 
     // Parse learning goal
+    console.log('[Generate API] Parsing goal...')
     const parsedGoal = await parseGoal(topic)
+    console.log('[Generate API] Goal parsed:', { 
+      topic: parsedGoal.topic, 
+      microSkillsCount: parsedGoal.microSkills.length 
+    })
     
     // Plan curriculum
+    console.log('[Generate API] Planning curriculum...')
     const curriculum = planCurriculum(parsedGoal.microSkills)
+    console.log('[Generate API] Curriculum planned:', { 
+      skillsCount: curriculum.length 
+    })
     
     // Generate course
     const courseId = nanoid(12)

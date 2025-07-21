@@ -7,6 +7,7 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard'
 import { calculateStreak, getStreakMessage } from '@/lib/gamification/streaks'
 import { checkNewAchievements } from '@/lib/gamification/achievements'
 import { format, subDays, startOfDay } from 'date-fns'
+import { userApi } from '@/lib/api-client'
 
 interface DashboardData {
   user: {
@@ -74,18 +75,15 @@ export default function Dashboard() {
         // Create a new user if none exists
         userId = `user-${Date.now()}`
         localStorage.setItem('userId', userId)
+        console.log('[Dashboard] Created new userId:', userId)
+      } else {
+        console.log('[Dashboard] Using existing userId:', userId)
       }
       
-      console.log('[Dashboard] Loading with userId:', userId)
+      // Use the api client which properly sets headers
+      const dashboardData = await userApi.getDashboard()
+      console.log('[Dashboard] Data loaded:', dashboardData)
       
-      const response = await fetch('/api/user/dashboard', {
-        headers: {
-          'x-user-id': userId
-        }
-      })
-      if (!response.ok) throw new Error('Failed to load dashboard')
-      
-      const dashboardData = await response.json()
       setData(dashboardData)
       setLoading(false)
 
@@ -102,8 +100,8 @@ export default function Dashboard() {
         })
       }
     } catch (error) {
-      console.error('Error loading dashboard:', error)
-      toast.error('Failed to load dashboard')
+      console.error('[Dashboard] Error loading dashboard:', error)
+      // Error toast is already shown by api.withStatus
       setLoading(false)
     }
   }
