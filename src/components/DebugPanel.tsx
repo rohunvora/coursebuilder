@@ -7,6 +7,7 @@ interface DebugData {
   analytics: any;
   environment: {
     apiUrl: string;
+    actualApiUrl?: string;
     debugMode: boolean;
     testMode: boolean;
     features: typeof config.features;
