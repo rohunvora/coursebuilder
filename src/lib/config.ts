@@ -29,9 +29,15 @@ export const config = {
 
 // Helper to get full API URL
 export function getApiUrl(path: string) {
-  const base = config.apiUrl.endsWith('/') ? config.apiUrl.slice(0, -1) : config.apiUrl;
+  // Always use relative URLs for API calls - this works in any environment
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${base}${cleanPath}`;
+  
+  // For API routes, ensure they start with /api
+  if (!cleanPath.startsWith('/api')) {
+    return `/api${cleanPath}`;
+  }
+  
+  return cleanPath;
 }
 
 // Helper to check if running in production

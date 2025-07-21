@@ -68,17 +68,19 @@ export default function Dashboard() {
 
   const loadDashboard = async () => {
     try {
-      // Get userId from localStorage
-      const userId = localStorage.getItem('userId')
+      // Get or create userId
+      let userId = localStorage.getItem('userId')
       if (!userId) {
         // Create a new user if none exists
-        const newUserId = `user-${Date.now()}`
-        localStorage.setItem('userId', newUserId)
+        userId = `user-${Date.now()}`
+        localStorage.setItem('userId', userId)
       }
+      
+      console.log('[Dashboard] Loading with userId:', userId)
       
       const response = await fetch('/api/user/dashboard', {
         headers: {
-          'x-user-id': userId || `user-${Date.now()}`
+          'x-user-id': userId
         }
       })
       if (!response.ok) throw new Error('Failed to load dashboard')

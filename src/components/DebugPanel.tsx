@@ -21,7 +21,8 @@ export default function DebugPanel() {
     course: null,
     analytics: null,
     environment: {
-      apiUrl: config.apiUrl,
+      apiUrl: '(using relative URLs)',
+      actualApiUrl: typeof window !== 'undefined' ? window.location.origin + '/api' : '/api',
       debugMode: config.debugMode,
       testMode: config.testMode,
       features: config.features,
