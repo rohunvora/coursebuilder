@@ -64,6 +64,37 @@ Visit `http://localhost:3000` and create your first course!
 
 ## How It Works
 
+```mermaid
+flowchart TB
+    subgraph Input["💡 Input"]
+        Topic["Any Topic"]
+    end
+    
+    subgraph Gen["🤖 AI Generation"]
+        GPT[GPT-4]
+        Skills[Skill Tree]
+        Cards[Flashcards]
+    end
+    
+    subgraph Learn["🧠 Learning Loop"]
+        Quiz[Quiz]
+        BKT[Bayesian Tracker]
+        SR[Spaced Repetition]
+    end
+    
+    Topic --> GPT
+    GPT --> Skills
+    Skills --> Cards
+    Cards --> Quiz
+    Quiz --> BKT
+    BKT --> SR
+    SR -->|"schedule review"| Quiz
+    
+    style Input fill:#0f0f23,stroke:#fbbf24,color:#fff
+    style Gen fill:#0f0f23,stroke:#a855f7,color:#fff
+    style Learn fill:#0f0f23,stroke:#06b6d4,color:#fff
+```
+
 ### Course Generation Pipeline
 1. **Topic Input**: Enter any subject (e.g., "React Hooks", "Italian Renaissance")
 2. **AI Processing**: GPT-4 generates structured learning content with difficulty progression
