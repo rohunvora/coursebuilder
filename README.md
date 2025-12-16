@@ -1,44 +1,22 @@
-# Course Builder v1.2 - Learning Science Edition
+# Course Builder
 
-AI-powered micro-learning platform that transforms any topic into a gamified, Duolingo-style course.
+**AI-powered course generator that transforms any topic into gamified, Duolingo-style micro-learning with spaced repetition and learning science.**
 
-## What's New in v1.2
+Turn "Machine Learning" or "Spanish Cooking" into a complete learning course in minutes. Our AI pipeline automatically generates structured flashcards, quizzes, and skill progressions, then uses Bayesian knowledge tracking and spaced repetition to optimize your retention. No manual course creation required.
 
-### 🧠 Learning Science Integration
-- **Bayesian Knowledge Tracking**: Scientifically models your understanding of each skill
-- **Spaced Repetition**: Optimal review scheduling based on SuperMemo 2 algorithm
-- **Confidence Calibration**: Rate your confidence before seeing if you're correct
-- **Forgetting Curve Modeling**: Predicts when you'll forget and schedules reviews accordingly
+## What It Does
 
-### 📊 Advanced Analytics
-- **Learning Dashboard**: Visualize your progress with interactive charts
-- **Skill Mastery Tracking**: See your knowledge probability for each skill
-- **Bloom's Taxonomy Progress**: Track advancement through cognitive levels
-- **Time Distribution Analysis**: Understand when you learn best
-
-### 🏆 Gamification 2.0
-- **Achievement System**: Unlock 12+ achievements across 5 categories
-- **Daily Streak Tracking**: Build consistent learning habits
-- **XP Leaderboard Ready**: Foundation for social learning features
-- **Mastery Levels**: Progress from Novice → Expert for each skill
-
-### 🔄 Review Mode
-- **Smart Review Sessions**: AI prioritizes what you're about to forget
-- **Adaptive Difficulty**: Questions get harder/easier based on performance
-- **Response Time Analysis**: Faster correct answers increase retention estimates
-- **Cross-Course Reviews**: Review skills from all your courses in one session
-
-### 🏗️ Architecture Improvements
-- **Modular Pipeline**: Inspired by academic prototypes with clean separation
-- **SQLite Database**: Persistent storage for all learning data
-- **Prisma ORM**: Type-safe database queries
-- **Production Ready**: Deployable to Vercel with one click
+- **🤖 AI Course Generation**: Input any topic → Get a complete course with cards, quizzes, and skill trees
+- **🧠 Learning Science**: Bayesian knowledge tracking, spaced repetition (SuperMemo 2), and forgetting curve modeling
+- **🎮 Gamification**: XP system, achievements, daily streaks, and mastery levels (Novice → Expert)
+- **📊 Analytics Dashboard**: Track progress, skill mastery probability, and learning patterns
+- **🔄 Smart Review Mode**: AI prioritizes content you're about to forget across all courses
 
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- Supabase account (free tier works)
+- Node.js 18+
+- Supabase account (free tier)
 - OpenAI API key
 
 ### Setup
@@ -50,206 +28,83 @@ cd coursebuilder
 npm install
 ```
 
-2. **Set up Supabase database**
-- Create a new project at [supabase.com](https://supabase.com)
-- Get your database URL from Settings → Database → Connection string (Pooling)
-- See [SUPABASE-SETUP.md](./SUPABASE-SETUP.md) for detailed instructions
-
-3. **Configure environment**
+2. **Configure environment**
 ```bash
-cp .env.local.example .env.local
-# Edit .env.local with your Supabase and OpenAI credentials
+cp .env.example .env.local
 ```
 
-4. **Set up database**
-```bash
-npm run setup-db:seed
-# This will push the schema and seed achievements
+Add your keys to `.env.local`:
+```env
+OPENAI_API_KEY=your_openai_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+DATABASE_URL=your_database_url
 ```
 
-5. **Run development server**
+3. **Setup database**
+```bash
+npm run setup-db
+npx prisma db push
+```
+
+4. **Start development**
 ```bash
 npm run dev
 ```
 
-6. **Open browser**
-Navigate to [http://localhost:3000](http://localhost:3000)
+Visit `http://localhost:3000` and create your first course!
 
-## Acceptance Test
+## How It Works
 
-1. Build a course on "Stoic philosophy"
-2. Verify:
-   - 7 cards with rising Bloom's taxonomy levels
-   - Plausible distractors (no nonsense answers)
-   - Critic scores ≥8 logged in console
-   - XP bar animations and confetti on completion
-   - Course loads instantly on refresh (cached)
-3. Test rate limiting: Two rapid requests → second returns 429
-4. Run Lighthouse audit → Score ≥90
+### Course Generation Pipeline
+1. **Topic Input**: Enter any subject (e.g., "React Hooks", "Italian Renaissance")
+2. **AI Processing**: GPT-4 generates structured learning content with difficulty progression
+3. **Skill Mapping**: Creates interconnected skills following Bloom's taxonomy
+4. **Card Generation**: Produces flashcards, multiple choice, and scenario-based questions
 
-## Features
-
-### Core Learning Experience
-- **7 Micro-Skills Per Course**: Each with targeted learning objectives
-- **Progressive Difficulty**: Questions advance through Bloom's taxonomy levels
-- **Instant Feedback**: Explanations reveal why answers are correct
-- **XP System**: Earn 10 XP per correct answer with visual progress tracking
-
-### User Interface
-- **Responsive Design**: Mobile-first with gradient aesthetics
-- **Smooth Animations**: Framer Motion for delightful interactions
-- **Accessibility**: Keyboard navigation and ARIA labels
-- **Toast Notifications**: Non-intrusive feedback messages
-
-### Technical Features
-- **OpenAI GPT-4o Integration**: Advanced question generation with critic validation
-- **Persistent Caching**: JSON file storage reduces API calls
-- **Rate Limiting**: Prevents abuse with per-IP restrictions
-- **TypeScript**: Full type safety throughout the codebase
-
-## Architecture
-
-```
-src/
-├── pages/              # Next.js pages
-│   ├── index.tsx       # Landing page with examples
-│   ├── course/         # Dynamic course routes
-│   └── api/            # Backend endpoints
-├── components/         # React components
-│   ├── QuizCard.tsx    # Interactive question cards
-│   ├── XPBar.tsx       # Progress visualization
-│   └── CompletionModal.tsx # Course completion celebration
-├── lib/                # Core logic
-│   ├── questionGenerator.ts # Bloom's taxonomy implementation
-│   ├── cache.ts        # File-based caching system
-│   └── env.ts          # Environment validation
-└── styles/             # Global styles with Tailwind
-```
-
-## API Endpoints
-
-### POST /api/generate
-Generate a new course for the given topic.
-- Rate limited: 1 request/minute per IP
-- Caches results by topic hash
-- Returns: `{ courseId: string }`
-
-### GET /api/course/[courseId]
-Retrieve course data by ID.
-- Returns full course structure with questions
-
-### POST /api/feedback
-Submit user feedback for quality improvement.
-- Tracks thumbs up/down with optional comments
-- Logs to console (ready for future ML pipeline)
-
-## Development
-
-### Run Tests
-```bash
-npm test
-```
-
-### Format Code
-```bash
-npm run format
-```
-
-### Build for Production
-```bash
-npm run build
-npm start
-```
+### Learning Science Features
+- **Bayesian Knowledge Tracking**: Models your understanding probability for each skill
+- **Spaced Repetition**: Schedules reviews using SuperMemo 2 algorithm
+- **Confidence Calibration**: Rate confidence before answers to improve self-assessment
+- **Response Time Analysis**: Faster correct answers boost retention estimates
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 (Pages Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS with custom gradients
-- **AI**: OpenAI GPT-4o with function calling
-- **Animation**: Framer Motion
-- **Notifications**: React Hot Toast
-- **Tour**: React Joyride
-- **Confetti**: Canvas Confetti
-- **IDs**: Nanoid
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Backend**: Prisma ORM, SQLite/PostgreSQL
+- **AI**: OpenAI GPT-4 API
+- **Database**: Supabase (production) or local SQLite
+- **Deployment**: Vercel-ready
 
-## v1.1 Features (Preserved)
+## Project Status
 
-- **Enhanced Question Quality**: Bloom's taxonomy, plausible distractors, critic validation
-- **Polished UX**: Beautiful landing, smooth animations, keyboard navigation
-- **Smart Engineering**: Nanoid IDs, caching, rate limiting
+This is a learning science research project turned into a functional prototype. The AI course generation pipeline is the core innovation - everything else builds on established learning platform patterns.
 
-## Architecture
+**What works well:**
+- Course generation from arbitrary topics
+- Learning science algorithms (spaced repetition, knowledge tracking)
+- Basic gamification and progress tracking
 
-```
-src/
-├── pages/              # Next.js pages
-│   ├── index.tsx       # Landing page
-│   ├── dashboard.tsx   # Learning analytics
-│   ├── review.tsx      # Spaced repetition
-│   └── api/            # Backend endpoints
-├── components/         # React components
-│   ├── QuizCard.tsx    # With confidence rating
-│   ├── AnalyticsDashboard.tsx # Charts & insights
-│   └── CompletionModal.tsx
-├── lib/                # Core logic
-│   ├── coursePipeline/ # Modular generation
-│   │   ├── goalParser.ts
-│   │   └── curriculumPlanner.ts
-│   ├── learnerModel/   # Learning science
-│   │   ├── knowledgeTracker.ts # Bayesian
-│   │   └── spacedRepetition.ts # SM2
-│   └── gamification/   # Engagement
-│       ├── achievements.ts
-│       └── streaks.ts
-└── prisma/             # Database schema
-```
+**What's experimental:**
+- AI-generated content quality varies by topic complexity
+- Analytics dashboard is functional but could be more sophisticated
+- Achievement system is basic but extensible
 
-## Deployment
+## Documentation
 
-### Deploy to Vercel
+- [Deployment Guide](DEPLOYMENT.md)
+- [Supabase Setup](SUPABASE-SETUP.md)
+- [Debug Guide](DEBUG_GUIDE.md)
+- [Directory Structure](DIRECTORY-MAP.md)
 
-1. Fork this repository
-2. Create a new project on Vercel
-3. Add environment variables:
-   - `OPENAI_API_KEY`: Your OpenAI API key
-   - `DATABASE_URL`: SQLite connection string
-4. Deploy!
+## Contributing
 
-### Local Development
-
-```bash
-# Install dependencies
-npm install
-
-# Set up database
-npx prisma generate
-npx prisma db push
-
-# Run development server
-npm run dev
-```
-
-## Learning Science References
-
-- **Bayesian Knowledge Tracing**: Corbett & Anderson (1994)
-- **SuperMemo 2 Algorithm**: Wozniak (1990)
-- **Forgetting Curve**: Ebbinghaus (1885)
-- **Bloom's Taxonomy**: Bloom et al. (1956)
+This project welcomes contributions, especially in:
+- Improving AI prompt engineering for course generation
+- Enhancing learning science algorithms
+- Adding new gamification features
+- Better analytics and visualization
 
 ## License
 
-MIT
-## Directory Structure
-
-```
-coursebuilder/
-├── src/          # Source code
-├── docs/         # Documentation
-├── tests/        # Test files
-├── demos/        # Standalone demos
-├── dist/         # Distribution packages
-├── scripts/      # Build and utility scripts
-├── config/       # Configuration files
-└── prisma/       # Database schema
-```
+MIT License - see LICENSE file for details.
