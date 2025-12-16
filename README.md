@@ -1,3 +1,11 @@
+<div align="center">
+  <img src="/.github/social-preview.png" alt="coursebuilder" width="800" />
+  <p><strong>AI-powered course builder that transforms any topic into gamified, Duolingo-style micro-learning with spaced repetition.</strong></p>
+  <p>
+    <a href="https://courseai-beta.vercel.app"><strong>🚀 Live Demo</strong></a>
+  </p>
+</div>
+
 # Course Builder
 
 **AI-powered course generator that transforms any topic into gamified, Duolingo-style micro-learning with spaced repetition and learning science.**
